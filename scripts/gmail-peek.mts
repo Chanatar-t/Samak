@@ -12,7 +12,12 @@ const { extract } = withExtract ? await import("../src/lib/extract.ts") : { extr
 for (const m of mails.sort((a, b) => +a.receivedAt - +b.receivedAt)) {
   console.log(`${m.receivedAt.toISOString().slice(0, 10)}  ${m.from.slice(0, 40).padEnd(40)}  ${m.subject}`);
   if (extract) {
-    const x = await extract(m);
-    console.log(`            → ${x ? `${x.kind} | ${x.company} | ${x.position} | ${x.source} | ${x.confidence}` : "(failed)"}`);
+    try {
+      const x = await extract(m);
+      console.log(`            → ${x ? `${x.kind} | ${x.company} | ${x.position} | ${x.source} | ${x.confidence}` : "(no answer)"}`);
+    } catch (e) {
+      console.log(`            → error: ${e instanceof Error ? e.message : e}`);
+      if (e instanceof Error && /credit balance|authentication|api[_ -]?key/i.test(e.message)) process.exit(1); // same for every email
+    }
   }
 }

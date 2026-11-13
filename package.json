@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:up": "docker compose up -d",
     "db:push": "drizzle-kit push",
-    "gmail:peek": "node scripts/gmail-peek.ts"
+    "gmail:peek": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gmail-peek.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
