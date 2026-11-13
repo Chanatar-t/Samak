@@ -9,7 +9,8 @@ export const JOB_QUERY = [
   "{from:jobthai.com from:jobsdb.com from:jobbkk.com from:jobs-noreply@linkedin.com",
   "subject:สมัคร subject:ใบสมัคร subject:สัมภาษณ์ subject:ตำแหน่ง",
   "subject:application subject:applying subject:applied subject:interview subject:assessment subject:candidate}",
-  '-subject:"job alert" -from:jobalerts-noreply@linkedin.com',
+  // drop known newsletters at the source (rules.ts would ignore them anyway, this just saves fetching)
+  '-subject:"job alert" -subject:"JOB UPDATE" -subject:"New jobs similar" -subject:"is hiring" -from:jobalerts-noreply@linkedin.com',
 ].join(" ");
 
 export async function fetchJobEmails(since: Date, query = JOB_QUERY): Promise<RawEmail[]> {
@@ -30,6 +31,7 @@ export async function fetchJobEmails(since: Date, query = JOB_QUERY): Promise<Ra
       for await (const m of client.fetch(uids, { source: true, emailId: true, internalDate: true }, { uid: true })) {
         if (!m.source || !m.emailId) continue;
         const p = await simpleParser(m.source);
+        if (p.from?.value.some((a) => a.address?.toLowerCase() === user.toLowerCase())) continue; // your own replies in the thread
         out.push({
           gmailMessageId: m.emailId,
           from: p.from?.text ?? "",

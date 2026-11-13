@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { db, applications, emails, events } from "@/db";
 import { fetchJobEmails, type RawEmail } from "./gmail";
 import { extract, type Extracted } from "./extract";
+import { classify, guess } from "./rules";
 import { findMatches, nextStatus } from "./match";
 
 const FIRST_SYNC_DAYS = 60;
@@ -38,7 +39,7 @@ export async function applyToApplication(appId: string, emailId: string, x: Extr
 export async function createFromEmail(userId: string, emailId: string, x: Extracted, receivedAt: Date) {
   const [app] = await db
     .insert(applications)
-    .values({ userId, company: x.company ?? "?", position: x.position ?? "?", source: x.source, status: "applied", appliedAt: receivedAt, lastActivityAt: receivedAt })
+    .values({ userId, company: x.company ?? "?", position: x.position ?? "ไม่ระบุตำแหน่ง", source: x.source, status: "applied", appliedAt: receivedAt, lastActivityAt: receivedAt })
     .returning();
   await db.insert(events).values({ applicationId: app.id, type: "applied", occurredAt: receivedAt, summary: x.summary, emailId });
   return app;
@@ -52,7 +53,12 @@ async function prepare(userId: string, e: RawEmail) {
     .onConflictDoNothing()
     .returning();
   if (!row) return null;
-  const x = await extract(e).catch((err) => { console.error("extract failed", e.subject, err); return null; });
+  // free rules for job-board templates first; Claude only for the rest, and only when a key is set
+  const x: Extracted | null =
+    classify(e) ??
+    (process.env.ANTHROPIC_API_KEY
+      ? await extract(e).catch((err) => { console.error("extract failed", e.subject, err); return guess(e); })
+      : guess(e));
   return { row, x, e };
 }
 
@@ -72,7 +78,9 @@ async function apply(userId: string, p: NonNullable<Awaited<ReturnType<typeof pr
     await applyToApplication(hits[0].id, row.id, x, e.receivedAt);
     return (r.updated++, state("matched"));
   }
-  if (sure && hits.length === 0 && x.kind === "application_confirmation" && x.company && x.position) {
+  // "someone viewed your resume" for a job we don't track = profile view, not news
+  if (x.kind === "viewed" && hits.length === 0) return (r.ignored++, state("ignored"));
+  if (sure && hits.length === 0 && x.kind === "application_confirmation" && x.company) {
     await createFromEmail(userId, row.id, x, e.receivedAt);
     return (r.created++, state("matched"));
   }

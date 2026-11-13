@@ -3,6 +3,7 @@ import { requireUser } from "@/auth";
 import { db, emails, applications } from "@/db";
 import type { Extracted } from "@/lib/extract";
 import { cn } from "@/lib/utils";
+import { findMatches } from "@/lib/match";
 import { Button } from "@/components/ui/button";
 import { select } from "../fields";
 import { attachEmail, createFromInbox, ignoreEmail } from "./actions";
@@ -25,7 +26,7 @@ export default async function InboxPage() {
   const userId = await requireUser();
   const review = await db.select().from(emails).where(and(eq(emails.userId, userId), eq(emails.processState, "needs_review"))).orderBy(desc(emails.receivedAt));
   const recent = await db.select().from(emails).where(and(eq(emails.userId, userId), ne(emails.processState, "needs_review"))).orderBy(desc(emails.receivedAt)).limit(30);
-  const apps = await db.select({ id: applications.id, company: applications.company, position: applications.position }).from(applications).where(eq(applications.userId, userId)).orderBy(applications.company);
+  const apps = await db.select().from(applications).where(eq(applications.userId, userId)).orderBy(applications.company);
 
   return (
     <div className="space-y-6">
@@ -40,6 +41,7 @@ export default async function InboxPage() {
         {!review.length && <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">ไม่มีอีเมลค้างตรวจ</p>}
         {review.map((e) => {
           const x = e.parsedJson as Extracted | null;
+          const hits = x ? findMatches(x.company, x.position, apps) : [];
           return (
             <article key={e.id} className="space-y-3 rounded-xl border bg-card p-4">
               <div className="flex flex-wrap items-baseline gap-x-3 text-xs text-muted-foreground">
@@ -58,7 +60,7 @@ export default async function InboxPage() {
               )}
               <div className="flex flex-wrap items-center gap-2 border-t pt-3">
                 <form action={attachEmail.bind(null, e.id)} className="flex min-w-0 flex-1 gap-2">
-                  <select name="applicationId" required className={cn(select, "min-w-0 flex-1")}>
+                  <select name="applicationId" required defaultValue={hits.length === 1 ? hits[0].id : ""} className={cn(select, "min-w-0 flex-1")}>
                     <option value="">ผูกกับใบสมัคร…</option>
                     {apps.map((a) => <option key={a.id} value={a.id}>{a.company} — {a.position}</option>)}
                   </select>
