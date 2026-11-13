@@ -20,6 +20,7 @@ function fields(f: FormData) {
     jobUrl: str(f, "jobUrl"),
     location: str(f, "location"),
     salaryText: str(f, "salaryText"),
+    jobDescription: str(f, "jobDescription"),
     notes: str(f, "notes"),
   };
 }

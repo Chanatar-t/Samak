@@ -19,9 +19,10 @@ export default function Add() {
     if (!m) return setMsg("ลิงก์ไม่ถูกต้อง");
     // keep what's already typed; only fill fields that came back non-empty
     const typed = Object.fromEntries([...new FormData(form.current!)].filter(([, v]) => v !== "")) as Partial<Application>;
-    const found = Object.fromEntries(Object.entries({ position: m.position, company: m.company, location: m.location }).filter(([, v]) => v));
-    setPrefill({ ...typed, jobUrl: url, source: m.source, ...found });
-    setMsg(m.error ? `${m.error} — กรอกเองได้เลย` : Object.keys(found).length ? "" : "ไม่เจอข้อมูลในหน้านี้ — กรอกเองได้เลย");
+    const { source, error, ...meta } = m;
+    const found = Object.fromEntries(Object.entries(meta).filter(([, v]) => v));
+    setPrefill({ ...typed, jobUrl: url, source, ...found });
+    setMsg(error ? `${error} — กรอกเองได้เลย` : Object.keys(found).length ? "" : "ไม่เจอข้อมูลในหน้านี้ — กรอกเองได้เลย");
   }
 
   return (

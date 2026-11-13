@@ -15,6 +15,7 @@ export default function Fields({ a }: { a?: Partial<Application> }) {
       <label className="block">ลิงก์ประกาศ<input name="jobUrl" type="url" defaultValue={a?.jobUrl ?? ""} className={input} /></label>
       <label className="block">สถานที่<input name="location" defaultValue={a?.location ?? ""} className={input} /></label>
       <label className="block">เงินเดือน<input name="salaryText" defaultValue={a?.salaryText ?? ""} className={input} /></label>
+      <label className="block">รายละเอียดงาน (JD)<textarea name="jobDescription" rows={8} defaultValue={a?.jobDescription ?? ""} className={input} /></label>
       <label className="block">โน้ต<textarea name="notes" rows={3} defaultValue={a?.notes ?? ""} className={input} /></label>
     </>
   );

@@ -20,6 +20,7 @@ export const applications = pgTable("applications", {
   jobUrl: text(),
   location: text(),
   salaryText: text(),
+  jobDescription: text(), // snapshot at add time, posts get taken down
   status: status().notNull().default("applied"),
   appliedAt: timestamp({ withTimezone: true }),
   lastActivityAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
