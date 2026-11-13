@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // ponytail: every page is per-user behind auth, nothing to prerender
+  cacheComponents: false,
   turbopack: {
     rules: {
       "*.css": {
