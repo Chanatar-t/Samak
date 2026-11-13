@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { signOut } from "@/auth";
 import "./globals.css";
 
 export const metadata: Metadata = { title: "Job Tracker" };
@@ -12,6 +13,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Link href="/">Board</Link>
           <Link href="/add">+ เพิ่ม</Link>
           <Link href="/dashboard">Dashboard</Link>
+          <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }} className="ml-auto">
+            <button className="text-neutral-500 hover:text-neutral-900">ออกจากระบบ</button>
+          </form>
         </nav>
         <main className="p-4">{children}</main>
       </body>
