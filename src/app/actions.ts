@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/auth";
 import { db, applications, events, STATUSES, SOURCES } from "@/db";
+import { parseJobHtml, type JobMeta } from "@/lib/job-meta";
 
 type Status = (typeof STATUSES)[number];
 type Source = (typeof SOURCES)[number];
@@ -74,20 +75,19 @@ export async function deleteApplication(id: string) {
 
 const SOURCE_HOSTS: [string, Source][] = [["jobthai", "jobthai"], ["jobsdb", "jobsdb"], ["jobbkk", "jobbkk"], ["linkedin", "linkedin"]];
 
-// ponytail: og/title meta only; job boards that render client-side return little, fill by hand then
-export async function fetchJobMeta(url: string) {
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36";
+
+// ponytail: JobsDB sits behind Cloudflare (403) — no server-side fetch works there, user fills by hand
+export async function fetchJobMeta(url: string): Promise<JobMeta & { source: Source; error?: string }> {
   await requireUser();
   const u = new URL(url);
   if (!["http:", "https:"].includes(u.protocol)) throw new Error("http(s) only");
   const source = SOURCE_HOSTS.find(([h]) => u.hostname.includes(h))?.[1] ?? "company_site";
   try {
-    const html = await (await fetch(u, { signal: AbortSignal.timeout(8000), headers: { "user-agent": "Mozilla/5.0" } })).text();
-    const meta = (p: string) =>
-      html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${p}["'][^>]+content=["']([^"']*)`, "i"))?.[1] ??
-      html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${p}["']`, "i"))?.[1];
-    const title = meta("og:title") ?? html.match(/<title[^>]*>([^<]*)/i)?.[1]?.trim() ?? "";
-    return { title, siteName: meta("og:site_name") ?? "", source };
+    const res = await fetch(u, { signal: AbortSignal.timeout(8000), headers: { "user-agent": UA, "accept-language": "th,en;q=0.8" } });
+    if (!res.ok) return { source, error: `เว็บนี้ไม่ให้ดึงข้อมูล (HTTP ${res.status})` };
+    return { ...parseJobHtml(await res.text()), source };
   } catch {
-    return { title: "", siteName: "", source };
+    return { source, error: "โหลดหน้าไม่สำเร็จ" };
   }
 }
