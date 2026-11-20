@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ต้นกล้า (sprout): a check mark grows two leaves; gold sun = good fortune rising. Every application is a seed. -->
+  <rect width="64" height="64" rx="15" fill="#2b241f"/>
+  <circle cx="17" cy="17" r="4" fill="#f5c84b"/>
+  <path d="M14 36 L25.5 47.5 L40 27" fill="none" stroke="#c6f04a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 27 C39 16 46 10 55 9.5 C55.5 19 50 26.5 40 27 Z" fill="#c6f04a"/>
+  <path d="M38.5 29 C31 28.5 27.5 23 28 17 C34.5 17.5 38.5 22 38.5 29 Z" fill="#9fd23a"/>
+  <path d="M43.5 23.5 L50.5 15" stroke="#2b241f" stroke-width="1.4" stroke-linecap="round"/>
+</svg>

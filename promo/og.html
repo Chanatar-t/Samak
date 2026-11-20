@@ -1,0 +1,110 @@
+<!doctype html>
+<!-- Facebook / Open Graph preview, 1200x630. All data is fictional.
+     Render: chrome --headless=new --hide-scrollbars --window-size=1200,630 --virtual-time-budget=5000 --allow-file-access-from-files --screenshot=promo/og.png promo/og.html -->
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: oklch(0.975 0.008 85); --ink: oklch(0.22 0.015 55); --muted: oklch(0.5 0.015 60);
+    --card: oklch(0.995 0.003 85); --line: oklch(0.9 0.012 80); --lime: oklch(0.9 0.19 122); --lime-ink: oklch(0.25 0.05 125);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body { background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans Thai", sans-serif; position: relative; }
+  .grain { position: absolute; inset: 0; background: radial-gradient(circle at 85% 15%, oklch(0.9 0.19 122 / .35), transparent 40%), radial-gradient(circle at 10% 110%, oklch(0.9 0.05 60 / .6), transparent 45%); }
+  .left { position: absolute; left: 64px; top: 64px; width: 520px; }
+  .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 24px; letter-spacing: -.01em; }
+  .dot { width: 14px; height: 14px; border-radius: 99px; background: var(--lime); box-shadow: 0 0 0 5px oklch(0.9 0.19 122 / .3); }
+  h1 { margin-top: 36px; font-size: 64px; line-height: 1.08; font-weight: 700; letter-spacing: -.025em; }
+  h1 mark { background: linear-gradient(transparent 18%, var(--lime) 18%, var(--lime) 94%, transparent 94%); color: var(--lime-ink); padding: 0 .1em; }
+  .sub { margin-top: 22px; font-size: 22px; line-height: 1.5; color: var(--muted); }
+  .chips { position: absolute; left: 64px; bottom: 56px; display: flex; flex-wrap: wrap; gap: 10px; width: 500px; }
+  .chip { border: 1.5px solid var(--line); background: var(--card); border-radius: 99px; padding: 7px 16px; font-size: 17px; font-weight: 500; }
+
+  .app { position: absolute; right: 36px; top: 64px; width: 540px; background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+         box-shadow: 0 40px 80px -30px oklch(0.3 0.03 60 / .35), 0 2px 0 oklch(1 0 0) inset; transform: rotate(-2.5deg); overflow: hidden; }
+  .bar { display: flex; gap: 7px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .bar i { width: 11px; height: 11px; border-radius: 99px; background: var(--line); }
+  .pipe { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+  .pipe div { padding: 14px 18px; border-right: 1px solid var(--line); }
+  .pipe small { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .pipe b { display: block; font-size: 34px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .s { width: 7px; height: 7px; border-radius: 99px; display: inline-block; }
+  .tabs { display: flex; gap: 6px; padding: 14px 18px 6px; font-size: 14px; }
+  .tab { padding: 5px 12px; border-radius: 99px; color: var(--muted); }
+  .tab.on { background: var(--ink); color: var(--bg); }
+  .tab .n { margin-left: 5px; padding: 0 6px; border-radius: 99px; background: var(--lime); color: var(--lime-ink); font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 13px 18px; border-top: 1px solid var(--line); }
+  .av { width: 40px; height: 40px; border-radius: 10px; color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 17px; flex: none; }
+  .t { flex: 1; min-width: 0; }
+  .t b { display: block; font-size: 16px; font-weight: 600; white-space: nowrap; }
+  .t span { font-size: 14px; color: var(--muted); }
+  .st { font-size: 13px; font-weight: 500; padding: 5px 12px; border-radius: 99px; white-space: nowrap; }
+  .ago { width: 92px; text-align: right; font-size: 13px; color: var(--muted); }
+  .follow { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--lime); color: var(--lime-ink); margin-right: 4px; }
+
+  .toast { position: absolute; right: 70px; bottom: 34px; background: var(--ink); color: var(--bg); border-radius: 16px; padding: 14px 20px;
+           display: flex; gap: 12px; align-items: center; font-size: 15px; box-shadow: 0 20px 40px -15px oklch(0.2 0.02 60 / .5); transform: rotate(1.5deg); }
+  .toast .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--lime); color: var(--lime-ink); display: grid; place-items: center; font-weight: 700; }
+  .toast b { display: block; font-weight: 600; }
+  .toast span { opacity: .7; font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <div class="left">
+    <div class="brand"><img src="../src/app/icon.svg" width="44" height="44" alt="">Job Tracker</div>
+    <h1>สมัครงานไป <mark>50+ ที่</mark><br>ก็ไม่หลุดสักใบ</h1>
+    <p class="sub">อ่านเมลตอบกลับจาก Gmail ให้เอง อัปเดตสถานะอัตโนมัติ<br>บอกว่าใบไหนควรตาม ใบไหนปล่อยได้</p>
+  </div>
+
+  <div class="chips">
+    <span class="chip">📬 Sync Gmail อัตโนมัติ</span>
+    <span class="chip">JobThai · JobsDB · JobBKK · LinkedIn</span>
+    <span class="chip">⏱ เตือนใบที่ควรตาม</span>
+    <span class="chip">👻 เงียบเกินเดือน ปิดให้เอง</span>
+  </div>
+
+  <div class="app">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="pipe">
+      <div><small><span class="s" style="background:#3b82f6"></span>รอตอบ</small><b>38</b></div>
+      <div><small><span class="s" style="background:#8b5cf6"></span>แบบทดสอบ</small><b>6</b></div>
+      <div><small><span class="s" style="background:#f59e0b"></span>สัมภาษณ์</small><b>4</b></div>
+      <div style="border-right:0"><small><span class="s" style="background:#10b981"></span>Offer</small><b>2</b></div>
+    </div>
+    <div class="tabs">
+      <span class="tab on">กำลังไป 50</span>
+      <span class="tab">ต้องตาม<span class="n">7</span></span>
+      <span class="tab">สัมภาษณ์ 4</span>
+      <span class="tab">ปิดแล้ว 21</span>
+    </div>
+    <div class="row">
+      <div class="av" style="background:#10b981">N</div>
+      <div class="t"><b>Frontend Developer</b><span>Northwind Digital · กรุงเทพฯ</span></div>
+      <span class="st" style="background:oklch(0.7 0.15 160 / .15);color:oklch(0.45 0.12 160)">ได้ offer</span>
+      <span class="ago">วันนี้</span>
+    </div>
+    <div class="row">
+      <div class="av" style="background:#f59e0b">L</div>
+      <div class="t"><b>Full-Stack Engineer</b><span>Lumen Labs · Hybrid</span></div>
+      <span class="st" style="background:oklch(0.8 0.15 75 / .2);color:oklch(0.5 0.12 65)">สัมภาษณ์</span>
+      <span class="ago">เมื่อวาน</span>
+    </div>
+    <div class="row">
+      <div class="av" style="background:#8b5cf6">K</div>
+      <div class="t"><b>Data Analyst</b><span>Kasem Analytics · ปทุมวัน</span></div>
+      <span class="st" style="background:oklch(0.6 0.2 290 / .13);color:oklch(0.45 0.18 290)">ทำแบบทดสอบ</span>
+      <span class="ago">3 วันก่อน</span>
+    </div>
+  </div>
+
+  <div class="toast">
+    <div class="ic">✓</div>
+    <div><b>Sync เสร็จ · อัปเดต 6 ใบ</b><span>นัดสัมภาษณ์ Lumen Labs พฤหัส 10:00</span></div>
+  </div>
+</body>
+</html>

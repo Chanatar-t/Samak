@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ส่งไกล: an application folded into a paper plane, flying up and far, towards a golden sparkle -->
+  <rect width="64" height="64" rx="15" fill="#2b241f"/>
+  <path d="M10 49 C16 47 20 45 23 42" fill="none" stroke="#c6f04a" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0.1 6" opacity=".7"/>
+  <path d="M13 31 L54 12 L42 52 L31.5 40.5 Z" fill="#c6f04a"/>
+  <path d="M54 12 L31.5 40.5 L33 51 L38.5 45 Z" fill="#9fd23a"/>
+  <path d="M54 12 L31.5 40.5" stroke="#2b241f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M16 9 C16.6 12.6 17.4 13.4 21 14 C17.4 14.6 16.6 15.4 16 19 C15.4 15.4 14.6 14.6 11 14 C14.6 13.4 15.4 12.6 16 9 Z" fill="#f5c84b"/>
+</svg>
