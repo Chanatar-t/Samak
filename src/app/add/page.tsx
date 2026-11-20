@@ -31,7 +31,7 @@ export default function Add() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-xl font-semibold">เพิ่มใบสมัคร</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">เพิ่มใบสมัคร</h1>
       <div className="rounded-xl border bg-card p-4">
         <p className="mb-2 text-sm text-muted-foreground">วางลิงก์ประกาศงาน แล้วระบบจะเติมข้อมูลให้</p>
         <div className="flex gap-2">

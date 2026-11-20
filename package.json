@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup": "node scripts/setup.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "db:up": "docker compose up -d",
     "db:push": "drizzle-kit push",
-    "gmail:peek": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gmail-peek.mts"
+    "gmail:peek": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gmail-peek.mts",
+    "test": "node --test src/lib/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

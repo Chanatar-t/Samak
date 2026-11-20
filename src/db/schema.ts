@@ -48,8 +48,19 @@ export const events = pgTable("events", {
   scheduledAt: timestamp({ withTimezone: true }),
 });
 
+// Gmail connection entered in the app (Settings). Falls back to GMAIL_USER / GMAIL_APP_PASSWORD env when empty.
+export const settings = pgTable("settings", {
+  userId: text().primaryKey(),
+  gmailUser: text(),
+  gmailAppPassword: text(), // encrypted, see lib/secret.ts
+  lastSyncAt: timestamp({ withTimezone: true }),
+  lastSyncError: text(),
+});
+
 export type Application = typeof applications.$inferSelect;
 
 export const SILENT_DAYS = 14;
+export const GHOST_DAYS = 30; // no news this long → auto "ghosted", user doesn't want to chase
+export const OPEN_STATUSES = ["applied", "assessment", "interview"] as const;
 export const isSilent = (a: Pick<Application, "status" | "lastActivityAt">) =>
-  ["applied", "assessment", "interview"].includes(a.status) && Date.now() - new Date(a.lastActivityAt).getTime() > SILENT_DAYS * 864e5;
+  (OPEN_STATUSES as readonly string[]).includes(a.status) && Date.now() - new Date(a.lastActivityAt).getTime() > SILENT_DAYS * 864e5;

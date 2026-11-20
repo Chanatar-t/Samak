@@ -1,12 +1,78 @@
 # Job Tracker
 
-Personal job application tracker. Phase 0: manual CRUD, kanban board, URL prefill, dashboard.
+ตัวช่วยติดตามใบสมัครงานสำหรับคนที่สมัครไปหลายสิบที่ อ่านเมลตอบกลับจาก Gmail ให้เอง แล้วอัปเดตสถานะให้อัตโนมัติ
 
-## Setup
+- อ่านเมลจาก **JobsDB, JobThai, JobBKK, LinkedIn, Workable** ด้วยกฎที่เขียนไว้ (ฟรี ไม่ต้องใช้ AI)
+- เมลที่ระบบไม่แน่ใจจะไปรอใน **Inbox** ให้ตรวจเอง
+- ใบที่เงียบเกิน 14 วันขึ้นใน **ต้องตาม** เกิน 30 วันย้ายไป **เงียบหาย** ให้เอง
+- รายการใบสมัครที่ค้นหา กรอง และเปลี่ยนสถานะได้ในคลิกเดียว พร้อมหน้าสรุปผล
 
-1. Copy `.env.example` → `.env.local` and fill it in:
-   - `AUTH_SECRET`: `npx auth secret`
-   - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`: Google Cloud Console → OAuth client (Web), redirect URI `http://localhost:3000/api/auth/callback/google`
-   - `ALLOWED_EMAIL`: the only Google account allowed in
-2. `npm run db:up` (Postgres in Docker), then `npm run db:push`
-3. `npm run dev`
+> ใช้กับ AI coding assistant (Claude Code, Cursor, Codex ฯลฯ) อยู่? บอกมันว่า **"ติดตั้งโปรเจกต์นี้ตาม AGENTS.md"** ได้เลย
+
+## ติดตั้ง
+
+ต้องมี [Node.js](https://nodejs.org) 20+ และ [Docker Desktop](https://www.docker.com/products/docker-desktop/) (เปิดไว้)
+
+```bash
+npm install
+npm run setup      # สร้าง .env.local, เปิด Postgres ใน Docker, สร้างตาราง, ตั้งรหัสผ่านเข้าเว็บ
+npm run dev        # เปิด http://localhost:3000
+```
+
+จากนั้นเข้าเว็บด้วยรหัสผ่านที่ตั้งไว้ (อยู่ใน `.env.local` บรรทัด `APP_PASSWORD`) แล้วไปหน้า **ตั้งค่า → เชื่อม Gmail**:
+
+1. เปิด [2-Step Verification](https://myaccount.google.com/signinoptions/twosv) ของบัญชี Google
+2. สร้าง [App Password](https://myaccount.google.com/apppasswords) แล้วคัดลอกรหัส 16 ตัว
+3. วางในหน้าตั้งค่า กด **ทดสอบและเชื่อมต่อ** ระบบจะ sync เมล 60 วันล่าสุดให้ทันที
+
+ไม่ต้องสร้าง project ใน Google Cloud
+
+## ข้อจำกัด (อ่านก่อนใช้)
+
+**การใช้งาน**
+- ใช้ได้ **คนเดียว** และออกแบบมาให้รันในเครื่องตัวเอง ยังไม่ใช่เว็บให้คนอื่นสมัครใช้
+- UI เป็นภาษาไทยเท่านั้น
+
+**Gmail**
+- รองรับแค่ **Gmail** ผ่าน IMAP + App Password (Outlook/Yahoo ยังไม่รองรับ)
+- สร้าง App Password ไม่ได้ถ้า: ไม่ได้เปิด 2-Step Verification, เป็นบัญชีองค์กร/มหาวิทยาลัยที่แอดมินปิดไว้, หรือเปิด Advanced Protection
+- เปลี่ยนรหัส Google หรือลบ App Password ทิ้ง → ต้องเชื่อมใหม่ในหน้าตั้งค่า
+- เปลี่ยน `AUTH_SECRET` → App Password ที่เก็บไว้ถอดรหัสไม่ได้ ต้องเชื่อมใหม่
+- แอปอ่านเมลอย่างเดียว ไม่ส่ง ไม่ลบ ไม่ติดดาว
+
+**การ sync**
+- sync ครั้งแรกย้อนหลัง 60 วัน
+- sync อัตโนมัติ **เฉพาะตอนเปิดเว็บ** (ทุก 10 นาทีเมื่อมีการโหลดหน้า) หรือกดปุ่ม Sync ในหน้า Inbox ถ้าปิดเครื่อง/ปิด `npm run dev` จะไม่ sync
+- เมลใหม่จากการ sync เบื้องหลังจะเห็นตอนโหลดหน้าถัดไป
+
+**การอ่านเมล**
+- อ่านจาก **รูปแบบเมลของแต่ละเว็บในปัจจุบัน** ถ้าเว็บหางานเปลี่ยนหน้าตาเมล อาจอ่านผิดหรืออ่านไม่ออกจนกว่าจะแก้กฎใน `src/lib/rules.ts`
+- เมลที่กฎไม่รู้จัก (เช่น HR ส่งมาเอง) จะไปรอตรวจใน Inbox ถ้าใส่ `ANTHROPIC_API_KEY` ระบบจะใช้ Claude อ่านให้ (มีค่าใช้จ่ายตามการใช้งาน)
+- เมล JobBKK แบบเก่าบางฉบับ (เท่าที่เจอคือช่วง ก.ย. 2026) ไม่มีชื่อบริษัท ต้องเลือกผูกเองใน Inbox
+- เมล "ปิดรับสมัครแล้ว" ของ JobsDB ถูกข้าม ไม่ได้บันทึกเป็นเหตุการณ์
+- ถ้าชื่อบริษัทในเมลกับที่กรอกเองต่างกันมาก อาจได้ใบซ้ำ และยังไม่มีปุ่มรวมใบ
+
+**สถานะ**
+- สถานะจากเมลเดินหน้าอย่างเดียว (สมัคร → ทดสอบ → สัมภาษณ์ → offer) ยกเว้น "ไม่ผ่าน" ที่ทับได้เสมอ และใบที่ "เงียบหาย" จะกลับมามีชีวิตถ้ามีเมลใหม่
+- เงียบเกิน 30 วัน (สมัครแล้ว / ทดสอบ / สัมภาษณ์) ย้ายไป "เงียบหาย" อัตโนมัติ ปรับได้ที่ `GHOST_DAYS` ใน `src/db/schema.ts`
+
+**เพิ่มใบจากลิงก์**
+- ดึงข้อมูลอัตโนมัติได้จาก JobThai และเว็บที่มี JSON-LD JobPosting **JobsDB บล็อกการดึง (Cloudflare)** ต้องกรอกเอง
+
+**ความปลอดภัย**
+- login ด้วยรหัสผ่านเดียว ไม่มีจำกัดจำนวนครั้งที่ลอง เหมาะกับ localhost ถ้าจะเปิดให้เข้าจากเน็ต ให้ใช้รหัสยาว หรือเปิด Google login (ดู `.env.example`)
+- ข้อมูลทั้งหมดอยู่ใน Docker volume `pgdata` **ไม่มี backup อัตโนมัติ** สำรองเองได้ด้วย
+  `docker compose exec -T db pg_dump -U postgres jobtracker > backup.sql`
+
+## ตัวเลือกเพิ่มเติม
+
+ดูคำอธิบายทุกตัวใน [`.env.example`](.env.example): Google login, Claude อ่านเมล (`ANTHROPIC_API_KEY`), Vercel Cron (`CRON_SECRET`)
+
+## พัฒนาต่อ
+
+```bash
+npm test                        # tests ของกฎอ่านเมล, การจับคู่, การเข้ารหัส
+npm run gmail:peek -- --days 7  # ดูว่า query ดึงเมลอะไรมาบ้าง (ไม่เขียน DB)
+```
+
+Stack: Next.js 16 (App Router) · Drizzle + Postgres · Auth.js · Tailwind 4 · imapflow

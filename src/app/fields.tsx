@@ -18,7 +18,7 @@ export function Field({ label, children, className }: { label: string; children:
 
 export default function Fields({ a }: { a?: Partial<Application> }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="@container"><div className="grid gap-4 @md:grid-cols-2">
       <Field label="ตำแหน่ง *"><Input name="position" required defaultValue={a?.position} /></Field>
       <Field label="บริษัท *"><Input name="company" required defaultValue={a?.company} /></Field>
       <Field label="เว็บที่มา">
@@ -29,12 +29,12 @@ export default function Fields({ a }: { a?: Partial<Application> }) {
       <Field label="ลิงก์ประกาศ"><Input name="jobUrl" type="url" defaultValue={a?.jobUrl ?? ""} /></Field>
       <Field label="สถานที่"><Input name="location" defaultValue={a?.location ?? ""} /></Field>
       <Field label="เงินเดือน"><Input name="salaryText" defaultValue={a?.salaryText ?? ""} /></Field>
-      <Field label="รายละเอียดงาน (JD)" className="sm:col-span-2">
+      <Field label="รายละเอียดงาน (JD)" className="@md:col-span-2">
         <Textarea name="jobDescription" rows={8} defaultValue={a?.jobDescription ?? ""} />
       </Field>
-      <Field label="โน้ต" className="sm:col-span-2">
+      <Field label="โน้ต" className="@md:col-span-2">
         <Textarea name="notes" rows={3} defaultValue={a?.notes ?? ""} />
       </Field>
-    </div>
+    </div></div>
   );
 }

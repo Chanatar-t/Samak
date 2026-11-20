@@ -5,9 +5,11 @@ import type { Extracted } from "@/lib/extract";
 import { cn } from "@/lib/utils";
 import { findMatches } from "@/lib/match";
 import { Button } from "@/components/ui/button";
-import { select } from "../fields";
 import { attachEmail, createFromInbox, ignoreEmail } from "./actions";
+import Link from "next/link";
+import { gmailCreds } from "@/lib/sync";
 import SyncButton from "./sync-button";
+import Attach from "./attach";
 
 const KIND: Record<Extracted["kind"], string> = {
   application_confirmation: "ยืนยันการสมัคร",
@@ -26,15 +28,27 @@ export default async function InboxPage() {
   const userId = await requireUser();
   const review = await db.select().from(emails).where(and(eq(emails.userId, userId), eq(emails.processState, "needs_review"))).orderBy(desc(emails.receivedAt));
   const recent = await db.select().from(emails).where(and(eq(emails.userId, userId), ne(emails.processState, "needs_review"))).orderBy(desc(emails.receivedAt)).limit(30);
+  const connected = await gmailCreds(userId).then(Boolean, () => false);
   const apps = await db.select().from(applications).where(eq(applications.userId, userId)).orderBy(applications.company);
+  // datalist matches on the visible text, so labels must be unique: same company + position twice gets its date
+  const base = (a: (typeof apps)[number]) => `${a.company} — ${a.position}`;
+  const dup = new Set(apps.map(base).filter((l, i, all) => all.indexOf(l) !== i));
+  const opts = apps.map((a) => ({ id: a.id, label: dup.has(base(a)) ? `${base(a)} (${(a.appliedAt ?? a.lastActivityAt).toLocaleDateString("th-TH")})` : base(a) }));
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Inbox</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Inbox</h1>
         <p className="text-sm text-muted-foreground">อีเมลเกี่ยวกับการสมัครงานจาก Gmail · อันที่ระบบไม่แน่ใจจะรอให้ตรวจที่นี่</p>
       </div>
-      <SyncButton />
+      {connected ? (
+        <SyncButton />
+      ) : (
+        <div className="rounded-xl bg-highlight/60 p-4 text-sm text-highlight-foreground">
+          ยังไม่ได้เชื่อม Gmail —{" "}
+          <Link href="/settings" className="font-semibold underline underline-offset-4">ไปเชื่อมที่หน้าตั้งค่า</Link> ใช้เวลาราว 2 นาที
+        </div>
+      )}
 
       <section className="space-y-3">
         <h2 className="font-medium">รอตรวจ <span className="text-muted-foreground">{review.length}</span></h2>
@@ -59,13 +73,7 @@ export default async function InboxPage() {
                 <p className="text-sm text-muted-foreground">อ่านอีเมลนี้ไม่สำเร็จ — เลือกเองได้</p>
               )}
               <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-                <form action={attachEmail.bind(null, e.id)} className="flex min-w-0 flex-1 gap-2">
-                  <select name="applicationId" required defaultValue={hits.length === 1 ? hits[0].id : ""} className={cn(select, "min-w-0 flex-1")}>
-                    <option value="">ผูกกับใบสมัคร…</option>
-                    {apps.map((a) => <option key={a.id} value={a.id}>{a.company} — {a.position}</option>)}
-                  </select>
-                  <Button variant="outline">ผูก</Button>
-                </form>
+                <Attach apps={opts} hits={hits.map((h) => opts.find((o) => o.id === h.id)!)} action={attachEmail.bind(null, e.id)} />
                 <form action={createFromInbox.bind(null, e.id)}><Button variant="outline">สร้างใบใหม่</Button></form>
                 <form action={ignoreEmail.bind(null, e.id)}><Button variant="ghost">ไม่เกี่ยว</Button></form>
               </div>

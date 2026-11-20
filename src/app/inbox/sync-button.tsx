@@ -15,7 +15,7 @@ export default function SyncButton() {
       {r && "error" in r && <span className="text-sm text-destructive">{r.error}</span>}
       {r && !("error" in r) && (
         <span className="text-sm text-muted-foreground">
-          อีเมลใหม่ {r.fetched} · สร้างใบใหม่ {r.created} · อัปเดต {r.updated} · รอตรวจ {r.review} · ไม่เกี่ยว {r.ignored}
+          อีเมลใหม่ {r.fetched} · สร้างใบใหม่ {r.created} · อัปเดต {r.updated} · รอตรวจ {r.review} · ไม่เกี่ยว {r.ignored}{r.ghosted ? ` · ย้ายไปเงียบหาย ${r.ghosted}` : ""}
         </span>
       )}
     </div>

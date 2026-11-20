@@ -33,7 +33,7 @@ export function avatar(company: string) {
   return { initial: [...name][0]?.toUpperCase() ?? "?", color: AVATAR[Math.abs(h) % AVATAR.length] };
 }
 
-const rtf = new Intl.RelativeTimeFormat("th", { numeric: "auto" });
+const rtf = new Intl.RelativeTimeFormat("th", { numeric: "auto", style: "short" }); // "16 วันที่แล้ว", fits table cells
 
 export function ago(d: Date | string) {
   const days = Math.round((new Date(d).getTime() - Date.now()) / 864e5);

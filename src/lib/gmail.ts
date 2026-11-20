@@ -13,12 +13,34 @@ export const JOB_QUERY = [
   '-subject:"job alert" -subject:"JOB UPDATE" -subject:"New jobs similar" -subject:"is hiring" -from:jobalerts-noreply@linkedin.com',
 ].join(" ");
 
-export async function fetchJobEmails(since: Date, query = JOB_QUERY): Promise<RawEmail[]> {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, ""); // Google shows it as "abcd efgh ijkl mnop"
-  if (!user || !pass) throw new Error("GMAIL_USER / GMAIL_APP_PASSWORD not set in .env.local");
+export type GmailCreds = { user: string; pass: string };
+export const envCreds = (): GmailCreds | null =>
+  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD } : null;
 
-  const client = new ImapFlow({ host: "imap.gmail.com", port: 993, secure: true, auth: { user, pass }, logger: false });
+function connect({ user, pass }: GmailCreds) {
+  // Google shows the app password as "abcd efgh ijkl mnop"
+  return new ImapFlow({ host: "imap.gmail.com", port: 993, secure: true, auth: { user: user.trim(), pass: pass.replace(/\s/g, "") }, logger: false });
+}
+
+/** Log in and log out; throws a Thai, actionable message on failure. */
+export async function testGmail(creds: GmailCreds) {
+  const client = connect(creds);
+  try {
+    await client.connect();
+    await client.logout();
+  } catch (e) {
+    const err = e as { authenticationFailed?: boolean; responseText?: string; code?: string; message?: string };
+    if (err.authenticationFailed || /AUTHENTICATIONFAILED|Invalid credentials/i.test(err.responseText ?? err.message ?? ""))
+      throw new Error("Gmail ไม่ยอมรับอีเมลหรือรหัสนี้ — ต้องใช้ App Password 16 ตัว (ไม่ใช่รหัส Gmail ปกติ) และต้องเปิด 2-Step Verification ก่อน");
+    if (/ENOTFOUND|ETIMEDOUT|ECONNREFUSED|EAI_AGAIN/.test(err.code ?? "")) throw new Error("ต่อ imap.gmail.com ไม่ได้ — เช็กอินเทอร์เน็ตหรือ firewall");
+    throw new Error(`เชื่อม Gmail ไม่สำเร็จ: ${err.responseText ?? err.message ?? String(e)}`);
+  }
+}
+
+export async function fetchJobEmails(since: Date, creds: GmailCreds | null = envCreds(), query = JOB_QUERY): Promise<RawEmail[]> {
+  if (!creds) throw new Error("ยังไม่ได้เชื่อม Gmail — ไปที่หน้า ตั้งค่า");
+  const user = creds.user.trim();
+  const client = connect(creds);
   await client.connect();
   try {
     // "All Mail" has a localized name (e.g. Thai UI), find it by its special-use flag

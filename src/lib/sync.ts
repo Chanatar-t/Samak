@@ -1,6 +1,7 @@
-import { desc, eq } from "drizzle-orm";
-import { db, applications, emails, events } from "@/db";
-import { fetchJobEmails, type RawEmail } from "./gmail";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
+import { db, applications, emails, events, settings, GHOST_DAYS, OPEN_STATUSES } from "@/db";
+import { envCreds, fetchJobEmails, type GmailCreds, type RawEmail } from "./gmail";
+import { decrypt } from "./secret";
 import { extract, type Extracted } from "./extract";
 import { classify, guess } from "./rules";
 import { findMatches, nextStatus } from "./match";
@@ -19,7 +20,7 @@ export const KIND_EVENT = {
 } as const;
 
 type Kind = keyof typeof KIND_EVENT;
-export type SyncResult = { fetched: number; created: number; updated: number; review: number; ignored: number };
+export type SyncResult = { fetched: number; created: number; updated: number; review: number; ignored: number; ghosted?: number };
 
 /** Apply one extracted email to an application: event + status bump + lastActivity. */
 export async function applyToApplication(appId: string, emailId: string, x: Extracted, receivedAt: Date) {
@@ -88,18 +89,79 @@ async function apply(userId: string, p: NonNullable<Awaited<ReturnType<typeof pr
 }
 
 // ponytail: LLM calls 5 in parallel, DB decisions one by one; a queue only if volume ever needs it
-export async function syncEmails(userId: string): Promise<SyncResult> {
+/** Gmail login: the one saved in Settings wins, else GMAIL_USER / GMAIL_APP_PASSWORD from env. */
+export async function gmailCreds(userId: string): Promise<GmailCreds | null> {
+  const [s] = await db.select().from(settings).where(eq(settings.userId, userId));
+  if (s?.gmailUser && s.gmailAppPassword) {
+    try {
+      return { user: s.gmailUser, pass: decrypt(s.gmailAppPassword) };
+    } catch {
+      throw new Error("ถอดรหัส App Password ไม่ได้ (AUTH_SECRET เปลี่ยน?) — เชื่อม Gmail ใหม่ในหน้า ตั้งค่า");
+    }
+  }
+  return envCreds();
+}
+
+const noteSync = (userId: string, lastSyncError: string | null) =>
+  db.insert(settings).values({ userId, lastSyncAt: new Date(), lastSyncError }).onConflictDoUpdate({ target: settings.userId, set: { lastSyncAt: new Date(), lastSyncError } });
+
+// `from` re-reads an older window (e.g. after a rules fix); already-stored mails are still skipped
+export async function syncEmails(userId: string, from?: Date): Promise<SyncResult> {
+  try {
+    const r = await runSync(userId, from);
+    await noteSync(userId, null);
+    return r;
+  } catch (e) {
+    await noteSync(userId, e instanceof Error ? e.message : String(e)).catch(() => {});
+    throw e;
+  }
+}
+
+async function runSync(userId: string, from?: Date): Promise<SyncResult> {
+  const creds = await gmailCreds(userId);
+  if (!creds) throw new Error("ยังไม่ได้เชื่อม Gmail — ไปที่หน้า ตั้งค่า");
   const [last] = await db.select({ at: emails.receivedAt }).from(emails).where(eq(emails.userId, userId)).orderBy(desc(emails.receivedAt)).limit(1);
   // IMAP SINCE is day-granular; step back a day, duplicates are skipped by gmailMessageId
-  const since = last ? new Date(last.at.getTime() - 864e5) : new Date(Date.now() - FIRST_SYNC_DAYS * 864e5);
+  const since = from ?? (last ? new Date(last.at.getTime() - 864e5) : new Date(Date.now() - FIRST_SYNC_DAYS * 864e5));
   const known = new Set((await db.select({ id: emails.gmailMessageId }).from(emails).where(eq(emails.userId, userId))).map((x) => x.id));
 
-  const fresh = (await fetchJobEmails(since)).filter((e) => !known.has(e.gmailMessageId)).sort((a, b) => +a.receivedAt - +b.receivedAt);
+  const fresh = (await fetchJobEmails(since, creds)).filter((e) => !known.has(e.gmailMessageId)).sort((a, b) => +a.receivedAt - +b.receivedAt);
   const r: SyncResult = { fetched: fresh.length, created: 0, updated: 0, review: 0, ignored: 0 };
   // oldest first so "applied" lands before "interview" for the same job
   for (let i = 0; i < fresh.length; i += 5) {
     const batch = await Promise.all(fresh.slice(i, i + 5).map((e) => prepare(userId, e)));
     for (const p of batch) if (p) await apply(userId, p, r);
   }
+  // after the mail pass, so a fresh reply saves an application from being ghosted
+  r.ghosted = await ghostStale(userId);
   return r;
+}
+
+/** Open applications with no news for GHOST_DAYS → "ghosted". lastActivityAt stays as the real last news. */
+export async function ghostStale(userId: string) {
+  const stale = await db
+    .update(applications)
+    .set({ status: "ghosted" })
+    .where(and(eq(applications.userId, userId), inArray(applications.status, [...OPEN_STATUSES]), lt(applications.lastActivityAt, new Date(Date.now() - GHOST_DAYS * 864e5))))
+    .returning({ id: applications.id });
+  if (stale.length) await db.insert(events).values(stale.map((a) => ({ applicationId: a.id, type: "note" as const, summary: `เงียบเกิน ${GHOST_DAYS} วัน → เงียบหาย (อัตโนมัติ)` })));
+  return stale.length;
+}
+
+// ponytail: in-memory throttle, one process only; on serverless the Vercel cron covers it
+const AUTO_EVERY = 10 * 60e3;
+let lastAuto = 0;
+let running = false;
+/** Background sync when the app is opened locally, at most every 10 min, never two at once. */
+export async function autoSync(userId: string) {
+  if (running || Date.now() - lastAuto < AUTO_EVERY) return;
+  running = true;
+  lastAuto = Date.now();
+  try {
+    await syncEmails(userId);
+  } catch (e) {
+    console.error("auto sync failed", e);
+  } finally {
+    running = false;
+  }
 }

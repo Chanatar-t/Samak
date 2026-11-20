@@ -53,8 +53,7 @@ export async function setStatus(id: string, status: Status) {
   if (!app) return;
   const type = (["applied", "assessment", "interview", "offer", "rejected"] as const).find((t) => t === status) ?? "note";
   await db.insert(events).values({ applicationId: id, type, summary: `สถานะ → ${status}` });
-  revalidatePath("/");
-  revalidatePath(`/a/${id}`);
+  revalidatePath("/", "layout"); // list, dashboard and detail all show status
 }
 
 export async function addNote(id: string, f: FormData) {
