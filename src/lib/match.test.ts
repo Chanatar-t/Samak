@@ -28,6 +28,8 @@ test("findMatches narrows by position when one company has several applications"
 
 test("nextStatus only moves forward, rejection wins, closed stays closed", () => {
   assert.equal(nextStatus("applied", "interview"), "interview");
+  assert.equal(nextStatus("ghosted", "interview"), "interview");
+  assert.equal(nextStatus("ghosted", null), "ghosted");
   assert.equal(nextStatus("interview", "assessment"), "interview");
   assert.equal(nextStatus("interview", "rejected"), "rejected");
   assert.equal(nextStatus("withdrawn", "interview"), "withdrawn");

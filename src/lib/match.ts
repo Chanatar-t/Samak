@@ -29,6 +29,7 @@ const RANK: Partial<Record<Status, number>> = { wishlist: 0, applied: 1, assessm
 export function nextStatus(current: Status, incoming: Status | null): Status {
   if (!incoming) return current;
   if (incoming === "rejected") return "rejected";
+  if (current === "ghosted") return incoming; // auto-ghosted, then they wrote back: it's alive again
   const cur = RANK[current];
   const inc = RANK[incoming];
   if (cur === undefined || inc === undefined) return current;

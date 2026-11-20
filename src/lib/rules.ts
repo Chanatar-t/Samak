@@ -55,6 +55,9 @@ export function classify(e: RawEmail): Classified | null {
       if ((m = body.match(/ใบสมัครตำแหน่ง (.+?) ถูกส่งถึง (.+?) แล้ว/))) return out("application_confirmation", source, m[2], m[1], "ส่งใบสมัครผ่าน JobThai แล้ว");
       return skip(source);
     case "jobbkk":
+      // copy of the cover letter JobBKK sends to the employer: "Application letter in <position>", body "เรียน <company> ดิฉัน/ผม..."
+      if ((m = s.match(/^Application letter in (.+)$/)))
+        return out("application_confirmation", source, body.match(/เรียน (.+?) ดิฉัน\/ผม/)?.[1] ?? null, m[1], "ส่งใบสมัครผ่าน JobBKK แล้ว");
       if ((m = body.match(/ประวัติของคุณได้ถูกเปิดดูโดย (.+?)(?: \[| https?:\/\/| <| เมื่อวันที่)/))) return out("viewed", source, m[1], null, "บริษัทเปิดดูเรซูเม่ใน JobBKK");
       return skip(source);
     case "linkedin":

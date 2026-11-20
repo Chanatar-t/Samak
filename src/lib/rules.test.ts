@@ -34,6 +34,11 @@ test("JobBKK resume viewed, job update ignored", () => {
   assert.equal(classify(mail('"JOBBKK.COM" <jobs@jobbkk.com>', "JOB UPDATE ตำแหน่งงานส่งตรงถึงท่าน"))?.kind, "not_job_application");
 });
 
+test("JobBKK application letter copy", () => {
+  const r = classify(mail('"JOBBKK.COM" <apply@jobbkk.com>', "Application letter in  Programmer(รับด่วน) ", "แนบไฟล์สมัคร เรียน บริษัท โปรเจค แพลนนิ่ง เซอร์วิส จำกัด (มหาชน)\nดิฉัน/ผมได้เห็นประกาศการรับสมัครงาน"));
+  assert.deepEqual(pick(r), ["application_confirmation", "บริษัท โปรเจค แพลนนิ่ง เซอร์วิส จำกัด (มหาชน)", "Programmer(รับด่วน)", "jobbkk"]);
+});
+
 test("LinkedIn + Workable", () => {
   const LI = '"LinkedIn" <jobs-noreply@linkedin.com>';
   assert.deepEqual(pick(classify(mail(LI, "Your application was viewed by OxygenAI"))), ["viewed", "OxygenAI", null, "linkedin"]);
