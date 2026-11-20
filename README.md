@@ -1,4 +1,4 @@
-# Job Tracker
+# Samak (สมัคร)
 
 ตัวช่วยติดตามใบสมัครงานสำหรับคนที่สมัครไปหลายสิบที่ อ่านเมลตอบกลับจาก Gmail ให้เอง แล้วอัปเดตสถานะให้อัตโนมัติ
 
@@ -14,6 +14,8 @@
 ต้องมี [Node.js](https://nodejs.org) 20+ และ [Docker Desktop](https://www.docker.com/products/docker-desktop/) (เปิดไว้)
 
 ```bash
+git clone https://github.com/Chanatar-t/Samak.git
+cd Samak
 npm install
 npm run setup      # สร้าง .env.local, เปิด Postgres ใน Docker, สร้างตาราง, ตั้งรหัสผ่านเข้าเว็บ
 npm run dev        # เปิด http://localhost:3000

@@ -27,7 +27,7 @@ export default async function Login() {
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny static svg */}
         <img src="/icon.svg" alt="" width={40} height={40} />
-        <h1 className="text-2xl font-semibold tracking-tight">Job Tracker</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Samak</h1>
       </div>
       {passwordSet ? (
         <LoginForm action={withPassword} />

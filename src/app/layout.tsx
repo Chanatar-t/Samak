@@ -11,7 +11,7 @@ import "./globals.css";
 
 const font = IBM_Plex_Sans_Thai({ subsets: ["thai", "latin"], weight: ["400", "500", "600"], variable: "--font-thai" });
 
-export const metadata: Metadata = { title: "Job Tracker" };
+export const metadata: Metadata = { title: "Samak" };
 
 async function reviewCount() {
   after(() => autoSync(OWNER)); // new mail shows up on the next page load
@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <div className="flex items-center gap-2 font-semibold tracking-tight lg:px-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- tiny static svg, next/image adds nothing */}
               <img src="/icon.svg" alt="" width={28} height={28} />
-              Job Tracker
+              Samak
             </div>
             <Nav inbox={inbox} />
             <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }} className="lg:mt-auto">

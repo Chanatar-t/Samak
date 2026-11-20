@@ -10,7 +10,7 @@ import ConnectForm from "./connect-form";
 
 const STEPS = [
   { text: "เปิด 2-Step Verification ของบัญชี Google (ถ้ายังไม่ได้เปิด)", href: "https://myaccount.google.com/signinoptions/twosv" },
-  { text: "สร้าง App Password ตั้งชื่ออะไรก็ได้ เช่น job-tracker แล้วคัดลอกรหัส 16 ตัว", href: "https://myaccount.google.com/apppasswords" },
+  { text: "สร้าง App Password ตั้งชื่ออะไรก็ได้ เช่น samak แล้วคัดลอกรหัส 16 ตัว", href: "https://myaccount.google.com/apppasswords" },
   { text: "วางอีเมลกับรหัสด้านล่าง แล้วกด ทดสอบและเชื่อมต่อ" },
 ];
 

@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Job Tracker: guide for AI agents
+# Samak: guide for AI agents
 
 Single-user, self-hosted job application tracker. Next.js 16 App Router + Drizzle/Postgres (Docker) + Auth.js v5.
 Reads job-board emails from Gmail over IMAP and updates application statuses. UI text is Thai.
