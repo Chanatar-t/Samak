@@ -47,6 +47,8 @@ function Button({
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
+      // Base UI defaults to type="button", which silently kills every <form action>; restore the native default
+      type="submit"
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
