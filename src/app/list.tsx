@@ -115,7 +115,11 @@ export default function List({ apps, params }: { apps: A[]; params: ListParams }
               ref={search}
               type="search"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => {
+                // a search looks for any card, so a closed one (rejected, ghosted) doesn't hide behind the default tab
+                if (!q.trim() && e.target.value.trim()) setView("all");
+                setQ(e.target.value);
+              }}
               placeholder="ค้นหาบริษัท ตำแหน่ง สถานที่"
               aria-label="ค้นหา"
               className="h-9 w-full rounded-full border border-input bg-card pr-10 pl-9 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
