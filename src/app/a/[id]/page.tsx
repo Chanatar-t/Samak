@@ -11,6 +11,12 @@ import { addNote, deleteApplication, updateApplication } from "../../actions";
 import Fields from "../../fields";
 import { Back, StatusSelect } from "./client";
 
+const BOARD_SITE: Record<string, string> = { jobsdb: "th.jobsdb.com", jobthai: "jobthai.com", jobbkk: "jobbkk.com", linkedin: "linkedin.com/jobs" };
+const postSearch = (a: { company: string; position: string; source: string }) => {
+  const site = BOARD_SITE[a.source];
+  return `https://www.google.com/search?q=${encodeURIComponent(`"${a.position}" ${a.company}${site ? ` site:${site}` : ""}`)}`;
+};
+
 const fmt = (d: Date) => d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
 const STEPS = ["applied", "assessment", "interview", "offer"] as const;
 
@@ -45,11 +51,10 @@ export default async function Detail({ params }: PageProps<"/a/[id]">) {
           {a.salaryText && <Meta><Wallet className="size-3.5" />{a.salaryText}</Meta>}
           {a.appliedAt && <Meta>สมัคร {a.appliedAt.toLocaleDateString("th-TH", { dateStyle: "medium" })}</Meta>}
           {isSilent(a) && <Meta className="bg-highlight text-highlight-foreground">เงียบ {ago(a.lastActivityAt)} · ควรตาม</Meta>}
-          {a.jobUrl && (
-            <a href={a.jobUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full px-2 py-1 font-medium underline-offset-4 hover:underline">
-              <ExternalLink className="size-3.5" />ดูประกาศงาน
-            </a>
-          )}
+          {/* board emails only carry tracked footer links, never the post, so cards made from mail have no jobUrl: fall back to a search */}
+          <a href={a.jobUrl ?? postSearch(a)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full px-2 py-1 font-medium underline-offset-4 hover:underline">
+            <ExternalLink className="size-3.5" />{a.jobUrl ? "ดูประกาศงาน" : "ค้นหาประกาศงาน"}
+          </a>
         </div>
 
         {!closed && a.status !== "wishlist" && (

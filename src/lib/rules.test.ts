@@ -26,6 +26,14 @@ test("JobThai sent", () => {
   const r = classify(mail('"JobThai - Upload File" <upload-file@application.jobthai.com>', "ใบสมัครส่งถึงบริษัทแล้ว (Your application was successfully sent)",
     "(English version below)\nใบสมัครตำแหน่ง Full Stack Developer ถูกส่งถึง Nemera Technologies Co., Ltd. แล้ว\nคุณได้ส่งใบสมัครงานเมื่อ"));
   assert.deepEqual(pick(r), ["application_confirmation", "Nemera Technologies Co., Ltd.", "Full Stack Developer", "jobthai"]);
+  const en = classify(mail('"JobThai - Upload File" <upload-file@application.jobthai.com>',
+    "Application for AI Engineer (Junior,Senior) (ลาดพร้าว101/3) has been delivered to บริษัท ทีธทอล์ค จำกัด (Teethtalk Dental Clinic) (Sep 24, 2026 10:15)"));
+  assert.deepEqual(pick(en), ["application_confirmation", "บริษัท ทีธทอล์ค จำกัด (Teethtalk Dental Clinic)", "AI Engineer (Junior,Senior) (ลาดพร้าว101/3)", "jobthai"]);
+});
+
+test("JobsDB profile interest = viewed", () => {
+  assert.deepEqual(pick(classify(mail('"โปรไฟล์ Jobsdb" <noreply@jobsdb.com>', "K.Stone Corporation Ltd. สนใจโปรไฟล์ Jobsdb ของคุณ"))),
+    ["viewed", "K.Stone Corporation Ltd.", null, "jobsdb"]);
 });
 
 test("JobBKK resume viewed, job update ignored", () => {

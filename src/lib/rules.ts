@@ -50,9 +50,14 @@ export function classify(e: RawEmail): Classified | null {
           : out("other_update", source, m[2], m[1], "มีอัปเดตใบสมัครใน Jobsdb", 0.8);
       if ((m = s.match(/^(.+?) has responded to your application for (.+)$/)))
         return out("other_update", source, m[1], m[2], "บริษัทส่งข้อความตอบกลับใบสมัครผ่าน Jobsdb — เปิดอ่านในอีเมล");
-      return skip(source); // job alerts, digests, "posting closed", profile views
+      // sync drops it when we don't track that company, so only real applications get the event
+      if ((m = s.match(/^(.+?) สนใจโปรไฟล์ Jobsdb ของคุณ$/))) return out("viewed", source, m[1], null, "บริษัทสนใจโปรไฟล์ใน Jobsdb");
+      return skip(source); // job alerts, digests, "posting closed"
     case "jobthai":
       if ((m = body.match(/ใบสมัครตำแหน่ง (.+?) ถูกส่งถึง (.+?) แล้ว/))) return out("application_confirmation", source, m[2], m[1], "ส่งใบสมัครผ่าน JobThai แล้ว");
+      // English template; the subject ends with the send date "(Sep 27, 2026 ...)"
+      if ((m = s.match(/^Application for (.+) has been delivered to (.+?)(?: \([A-Z][a-z]{2} \d{1,2}, \d{4}[^)]*\))?$/)))
+        return out("application_confirmation", source, m[2], m[1], "ส่งใบสมัครผ่าน JobThai แล้ว");
       return skip(source);
     case "jobbkk":
       // copy of the cover letter JobBKK sends to the employer: "Application letter in <position>", body "เรียน <company> ดิฉัน/ผม..."
